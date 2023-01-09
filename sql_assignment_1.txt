@@ -1,0 +1,225 @@
+1)Select the Employee with the top three salaries
+
+select * from employee order by salary desc limit 3;
+
++------+---------------+--------+--------+------------+
+| E_ID | NAME          | DEP_ID | SALARY | MANAGER_ID |
++------+---------------+--------+--------+------------+
+| A142 | TARA CUMMINGS | D04    |  99475 | A187       |
+| A132 | PAUL VINCENT  | D01    |  94791 | A120       |
+| A128 | ADAM WAYNE    | D05    |  94324 | A165       |
++------+---------------+--------+--------+------------+
+
+
+2)Select the Employee with the least salary
+
+select * from employee where salary=(select min(salary) from employee);
+
++------+-------------+--------+--------+------------+
+| E_ID | NAME        | DEP_ID | SALARY | MANAGER_ID |
++------+-------------+--------+--------+------------+
+| A111 | JOHN HELLEN | D01    |  15380 | A120       |
++------+-------------+--------+--------+------------+
+
+
+3)Select the Employee who does not have a manager in the department table
+
+select name from employee where manager_id not in (select e_id from employee where name in (select dep_manager from dept));
++-----------------+
+| name            |
++-----------------+
+| BRUCE WILLS     |
+| TIM ARCHER      |
+| ADAM JUSTIN     |
+| ROBERT SWIFT    |
+| NATASHA STEVENS |
++-----------------+
+
+
+4)Select the Employee who is also a Manager
+
+select name from employee e where e.e_id in(select manager_id from employee);
++-----------------+
+| name            |
++-----------------+
+| BRUCE WILLS     |
+| TIM ARCHER      |
+| ADAM JUSTIN     |
+| ROBERT SWIFT    |
+| NATASHA STEVENS |
++-----------------+
+
+5)Select the Empolyee who is a Manager and has least salary
+
+select salary,name from employee e where e.e_id in(select manager_id from employee) order by salary asc limit 1;
+
++--------------+
+| name         |
++--------------+
+| ROBERT SWIFT |
++--------------+
+
+
+6)Select the total number of Employees in Communications departments
+
+select count(e_id) from employee e inner join  dept d on e.dep_id=d.dep_id where dep_name="COMMUNICATIONS"; 
+
++-------------+
+| count(e_id) |
++-------------+
+|           6 |
++-------------+
+
+7)Select the Employee in Finance Department who has the top salary
+
+select name from employee where salary=(select max(salary) from employee e inner join  dept d on e.dep_id=d.dep_id where dep_name="FINANCE");
++------------+
+| name       |
++------------+
+| ADAM WAYNE |
++------------+
+
+8)Select the Employee in product depatment who has the least salary
+
+select name from employee where salary=(select min(salary) from employee e inner join  dept d on e.dep_id=d.dep_id where dep_name="PRODUCT");
+
++-------------+
+| name        |
++-------------+
+| NICK MARTIN |
++-------------+
+
+9)Select the count of Empolyees in Health with maximum salary
+
+select count(e_id) from employee e,dept d where salary=(select max(salary) from employee) and  e.dep_id=d.dep_id and dep_name="Health";
+
++-------------+
+| count(e_id) |
++-------------+
+|           0 |
++-------------+
+
+10)Select the Employees who report to Natasha Stevens
+
+select name from employee where manager_id in (select e_id from employee e inner join  dept d on e.dep_id=d.dep_id where dep_manager="NATASHA STEVENS");
+
++----------------+
+| name           |
++----------------+
+| ADAM WAYNE     |
+| JOSEPH ANGELIN |
++----------------+
+
+11)Display the Employee name,Employee count,Dep name,Dept manager in the Health department
+
+select e.name ,count(e_id),d.dep_name,d.dep_manager from employee e inner join  dept d on e.dep_id=d.dep_id where dep_name="HEALTH"; 
+
++-------------+-------------+----------+-------------+
+| name        | count(e_id) | dep_name | dep_manager |
++-------------+-------------+----------+-------------+
+| JOHN HELLEN |           6 | HEALTH   | TIM ARCHER  |
++-------------+-------------+----------+-------------+
+
+Here all empolyees in health department should be returned but only one employee name is returning.
+
+
+12)Display the Department id,Employee ids and Manager ids for the Communications department
+
+select d.dep_id,e.e_id,e.manager_id from employee e inner join  dept d on e.dep_id=d.dep_id where dep_name="COMMUNICATIONS"; 
+
++--------+------+------------+
+| dep_id | e_id | manager_id |
++--------+------+------------+
+| D02    | A116 | A187       |
+| D02    | A198 | A187       |
+| D02    | A187 | A298       |
+| D02    | A121 | A187       |
+| D02    | A194 | A187       |
+| D02    | A133 | A187       |
++--------+------+------------+
+
+13)Select the Average Expenses for Each dept with Dept id and Dept name
+
+select avg(e.salary),d.dep_id,d.dep_name from employee e inner join  dept d on e.dep_id=d.dep_id group by d.dep_id;
+
++---------------+--------+----------------+
+| avg(e.salary) | dep_id | dep_name       |
++---------------+--------+----------------+
+|    54527.6667 | D01    | HEALTH         |
+|    48271.3333 | D02    | COMMUNICATIONS |
+|    58517.5000 | D03    | PRODUCT        |
+|    51913.3333 | D04    | INSURANCE      |
+|    56660.3333 | D05    | FINANCE        |
++---------------+--------+----------------+
+
+14)Select the total expense for the department finance
+
+select sum(e.salary) from employee e inner join  dept d on e.dep_id=d.dep_id where dep_name="FINANCE";
+
++---------------+
+| sum(e.salary) |
++---------------+
+|        169981 |
++---------------+
+
+15)Select the department which spends the least with Dept id and Dept manager name
+
+select dep_name ,dep_id,dep_manager from dept where dep_name in (select dep_name from (select sum(e.salary) as sum_salary ,dep_name from employee e inner join  dept d on e.dep_id=d.dep_id group by dep_name order by  sum_salary limit 1));
+
++----------------+--------+-----------------+
+| dep_name       | dep_id | dep_manager     |
++----------------+--------+-----------------+
+| PRODUCT        | D03    | BRUCE WILLS     |
++----------------+--------+-----------------+
+
+16)Select the count of Employees in each department
+
+select count(e_id) ,dep_name from employee e inner join  dept d on e.dep_id=d.dep_id group by d.dep_name;
+
++-------------+----------------+
+| count(e_id) | dep_name       |
++-------------+----------------+
+|           6 | HEALTH         |
+|           6 | COMMUNICATIONS |
+|           2 | PRODUCT        |
+|           3 | INSURANCE      |
+|           3 | FINANCE        |
++-------------+----------------+
+
+17)Select the count of Employees in each department having salary <10000
+
+select count(e_id) ,dep_name from employee e inner join  dept d on e.dep_id=d.dep_id where salary <10000 group by d.dep_name; 
+
+Empty set (0.00 sec)
+
+
+18)Select the total number of Employees in Dept id D04
+
+select count(e_id) from employee where dep_id="D04"; 
+
++-------------+
+| count(e_id) |
++-------------+
+|           3 |
++-------------+
+
+19)Select all department details of the Department with Maximum Employees
+
+Select * from dept where dep_id = (select dep_id from (Select dep_id, count(dep_id) from Employee group by dep_id order by count(dep_id) desc));
+
++--------+----------------+-----------------+
+| DEP_ID | DEP_NAME       | DEP_MANAGER     |
++--------+----------------+-----------------+
+| D02    | COMMUNICATIONS | ADAM JUSTIN     |
++--------+----------------+-----------------+
+
+
+20)Select the Employees who has Tim Cook as their manager
+
+select name from employee where manager_id in (select e_id from employee where name"="TIM COOK");
+
+Empty set (0.00 sec)
+
+
+Note:
+In 19th question 2 rows should be returned as 2 departments have 6 employess but oly 1 row is returning.
