@@ -1,0 +1,260 @@
+1)
+
+mysql> select * from profession;
++------+--------+------------+
+| id   | name   | profession |
++------+--------+------------+
+|    1 | sam    | doctor     |
+|    2 | shyam  | actor      |
+|    3 | samuel | cricketer  |
+|    4 | sammy  | singer     |
++------+--------+------------+
+
+
+We are given a table consisting of two columns, Name, and Profession. We need to query all the names immediately followed by the first letter in the profession column enclosed in parenthesis.
+
+
+select concat(name,'(',substr(profession,1,1),')') from profession;
++---------------------------------------------+
+| concat(name,'(',substr(profession,1,1),')') |
++---------------------------------------------+
+| sam(d)                                      |
+| shyam(a)                                    |
+| samuel(c)                                   |
+| sammy(s)                                    |
++---------------------------------------------+
+
+
+2)
+We are given a table, which is a Binary Search Tree consisting of two columns Node and Parent. We must write a query that returns the node type ordered by the value of nodes in ascending order. There are 3 types.
+
+Root - if the node is a root
+Leaf - if the node is a leaf
+Inner - if the node is neither root nor leaf.
+
+ select * from bst;
++------+------+
+| n    | p    |
++------+------+
+|    1 |    2 |
+|    3 |    2 |
+|    6 |    8 |
+|    9 |    8 |
+|    2 |    5 |
+|    8 |    5 |
+|    5 | NULL |
++------+------+
+
+select n,case when p is null then 'root'
+    -> when n in (select p from bst where p!='null') then 'inner'
+    -> else 'leaf'
+    -> end
+    -> as node_desc from bst order by n;
++------+-----------+
+| n    | node_desc |
++------+-----------+
+|    1 | leaf      |
+|    2 | inner     |
+|    3 | leaf      |
+|    5 | root      |
+|    6 | leaf      |
+|    8 | inner     |
+|    9 | leaf      |
++------+-----------+
+
+
+3)
+
+select * from student;
++----+-------------------------+
+| Id | marks                   |
++----+-------------------------+
+|  1 | 101,104,1900,46675,7895 |
+|  2 | 1010,18949,37465        |
+|  3 | 2010,1201,2743874,7485  |
++----+-------------------------+
+The marks column in the Student table contains comma-separated values. How would you calculate the number of those comma-separated values?
+
+select (char_length(marks)-char_length(replace(marks,',','')))+1 as n_sub from student;
++-------+
+| n_sub |
++-------+
+|     5 |
+|     3 |
+|     4 |
++-------+
+
+
+4) Display first and last names from names table?
+
+select * from names;
++---------------+
+| name          |
++---------------+
+| John,Smith    |
+| David,Miller  |
++---------------+
+
+select name,substring_index(name,",",1) as f_name,substring_index(name,",",-1) as l_name from names;
++---------------+--------+---------+
+| name          | f_name | l_name  |
++---------------+--------+---------+
+| John,Smith    | John   | Smith   |
+| David,Miller  | David  | Miller  |
++---------------+--------+---------+
+2 rows in set (0.07 sec)
+
+
+5)
+
++------+--------------+
+| Id   | Name         |
++------+--------------+
+|  100 | Chris Brown  |
+|  101 | Adam Smith   |
+|  101 | John Doe     |
+|  100 | David Miller |
+|  101 | Carol Taylor |
+|  103 | Bob Taylor   |
++------+--------------+
+
+concat the names who have same id
+
+select Id,group_concat(Name) from DemoTable group by Id;
++------+----------------------------------+
+| Id   | group_concat(Name)               |
++------+----------------------------------+
+|  100 | Chris Brown,David Miller         |
+|  101 | Adam Smith,John Doe,Carol Taylor |
+|  103 | Bob Taylor                       |
++------+----------------------------------+
+
+6)
+Combine the above table using *;
+
+select Id,group_concat(Name separator ' * ') from DemoTable group by Id;
++------+--------------------------------------+
+| Id   | group_concat(Name separator ' * ')   |
++------+--------------------------------------+
+|  100 | Chris Brown * David Miller           |
+|  101 | Adam Smith * John Doe * Carol Taylor |
+|  103 | Bob Taylor                           |
++------+--------------------------------------+
+3 rows in set (0.00 sec)
+
+
+7)
+Tina was asked to compute the average salary of all employees from the EMPLOYEES table she created but realized that the zero key in her keyboard is not working after the result showed a very less average. She wants our help in finding out the difference between miscalculated average and actual average.
+
+
+Actual table
++------+--------+--------+
+| id   | name   | salary |
++------+--------+--------+
+|    1 | Sam    |   1420 |
+|    2 | Shyam  |   2006 |
+|    3 | Samuel |   1201 |
+|    4 | Sammy  |   5000 |
++------+--------+--------+
+
+
+Tina entered
++------+--------+--------+
+| id   | name   | salary |
++------+--------+--------+
+|    1 | Sam    |    142 |
+|    2 | Shyam  |     26 |
+|    3 | Samuel |    121 |
+|    4 | Sammy  |      5 |
++------+--------+--------+
+
+
+select avg(salary)-avg(replace(salary,0,'')) as error from emp1;
++---------+
+| error   |
++---------+
+| 2333.25 |
++---------+
+
+
+8)
+
++------+------+--------+--------+
+| id   | name | marks1 | marks2 |
++------+------+--------+--------+
+|    1 | Sam  |     80 |     90 |
+|    2 | Adam |     88 |     50 |
+|    2 | Eren |     60 |     70 |
+|    2 | Don  |     66 |     77 |
++------+------+--------+--------+
+
+You are given a ‘Students’ table consisting of Id,Name and marks of two tests namely Marks1 and Marks2. 
+The teacher wants to sort the table based on their marks(in descending order). 
+However the teacher has a particular hate towards students whose Names starts with a vowel.
+ Therefore the teacher would take the maximum of the two tests for students whose name doesn’t start with a vowel while sorting, 
+and would take the minimum of the two tests for the students whose name starts with a vowel while sorting.
+
+select s.Name from (select Name , 
+(Case when SUBSTR(Name,1,1) in ('A','E','I','O','U') Then LEAST(Marks1,Marks2)
+ when SUBSTR(Name,1,1) not in ('A','E','I','O','U') Then GREATEST(Marks1,Marks2) 
+END) as 'Marks' 
+from Student1 order by Marks DESC) s ;
+
++------+
+| Name |
++------+
+| Sam  |
+| Don  |
+| Eren |
+| Adam |
++------+
+
+
+9)
+
+Given a table NUMBERS, determine for each row, if the sum of the numbers are ‘Positive’, ‘Negative’, or ‘Zero’.
++------+------+------+
+| A    | B    | C    |
++------+------+------+
+|   10 |  -10 |    0 |
+|   10 |   10 |    0 |
+|   10 | -200 |   20 |
++------+------+------+
+
+select case when (a+b+c) =0 then 'zero'
+    -> when (a+b+c) < 0 then 'negative'
+    -> else 'positive'
+    -> end as Row_sum from numbers;
++----------+
+| Row_sum  |
++----------+
+| zero     |
+| positive |
+| negative |
++----------+
+
+10)
+
++------+-----------+---------------+
+| id   | name      | country       |
++------+-----------+---------------+
+|    1 | hyderabad | india         |
+|    1 | paris     | france        |
+|    1 | new york  | united states |
++------+-----------+---------------+
+
+Given a table PLACES, count the number of Countries which end with a vowel.
+
+select count(country) from places where right(country,1) in ('a','e','i','o','u');
++----------------+
+| count(country) |
++----------------+
+|              2 |
++----------------+
+
+
+
+
+
+
+
