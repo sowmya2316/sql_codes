@@ -1,0 +1,194 @@
+ +-----+-------------------------+-------+
+| mid | title                   | stars |
++-----+-------------------------+-------+
+| 101 | Gone with the wind      |     2 |
+| 101 | Gone with the wind      |     4 |
+| 101 | Gone with the wind      |     3 |
+| 103 | The Sound of Music      |     2 |
+| 103 | The Sound of Music      |     3 |
+| 104 | E.T.                    |     2 |
+| 104 | E.T.                    |     3 |
+| 106 | Snow White              |     4 |
+| 106 | Snow White              |     5 |
+| 107 | Avatar                  |     3 |
+| 107 | Avatar                  |     5 |
+| 108 | Raiders of the Lost Ark |     4 |
+| 108 | Raiders of the Lost Ark |     2 |
+| 108 | Raiders of the Lost Ark |     4 |
++-----+-------------------------+-------+
+
+a) CASE
+
+The CASE statement goes through conditions and return a value when the first condition is met (like an IF-THEN-ELSE statement).
+So, once a condition is true, it will stop reading and return the result.
+If no conditions are true, it will return the value in the ELSE clause.
+
+select title,stars,case when stars = 2 then 'Low'
+    -> when stars in (3,4) then 'Average'
+    -> when stars = 5 then 'Good'
+    -> else 'invalid rating'
+    -> end as rating from movie_ratings;
++-------------------------+-------+---------+
+| title                   | stars | rating  |
++-------------------------+-------+---------+
+| Gone with the wind      |     2 | Low     |
+| Gone with the wind      |     4 | Average |
+| Gone with the wind      |     3 | Average |
+| The Sound of Music      |     2 | Low     |
+| The Sound of Music      |     3 | Average |
+| E.T.                    |     2 | Low     |
+| E.T.                    |     3 | Average |
+| Snow White              |     4 | Average |
+| Snow White              |     5 | Good    |
+| Avatar                  |     3 | Average |
+| Avatar                  |     5 | Good    |
+| Raiders of the Lost Ark |     4 | Average |
+| Raiders of the Lost Ark |     2 | Low     |
+| Raiders of the Lost Ark |     4 | Average |
++-------------------------+-------+---------+
+
+b)row number
+
+The ROW_NUMBER() function in MySQL is used to returns the sequential number for each row within its partition. It is a kind of window function. The row number starts from 1 to the number of rows present in the partition.
+
+
+select *,row_number() over(order by mid) as row_num  from movie_ratings;
++-----+-------------------------+-------+---------+
+| mid | title                   | stars | row_num |
++-----+-------------------------+-------+---------+
+| 101 | Gone with the wind      |     2 |       1 |
+| 101 | Gone with the wind      |     4 |       2 |
+| 101 | Gone with the wind      |     3 |       3 |
+| 103 | The Sound of Music      |     2 |       4 |
+| 103 | The Sound of Music      |     3 |       5 |
+| 104 | E.T.                    |     2 |       6 |
+| 104 | E.T.                    |     3 |       7 |
+| 106 | Snow White              |     4 |       8 |
+| 106 | Snow White              |     5 |       9 |
+| 107 | Avatar                  |     3 |      10 |
+| 107 | Avatar                  |     5 |      11 |
+| 108 | Raiders of the Lost Ark |     4 |      12 |
+| 108 | Raiders of the Lost Ark |     2 |      13 |
+| 108 | Raiders of the Lost Ark |     4 |      14 |
++-----+-------------------------+-------+---------+
+
+
+c) partion by
+
+The ROW_NUMBER() function in MySQL is used to returns the sequential number for each row within its partition. It is a kind of window function. The row number starts from 1 to the number of rows present in the partition.
+
+ select *,row_number() over(partition by title order by stars desc) as 'partition'  from movie_ratings;
++-----+-------------------------+-------+-----------+
+| mid | title                   | stars | partition |
++-----+-------------------------+-------+-----------+
+| 107 | Avatar                  |     5 |         1 |
+| 107 | Avatar                  |     3 |         2 |
+| 104 | E.T.                    |     3 |         1 |
+| 104 | E.T.                    |     2 |         2 |
+| 101 | Gone with the wind      |     4 |         1 |
+| 101 | Gone with the wind      |     3 |         2 |
+| 101 | Gone with the wind      |     2 |         3 |
+| 108 | Raiders of the Lost Ark |     4 |         1 |
+| 108 | Raiders of the Lost Ark |     4 |         2 |
+| 108 | Raiders of the Lost Ark |     2 |         3 |
+| 106 | Snow White              |     5 |         1 |
+| 106 | Snow White              |     4 |         2 |
+| 103 | The Sound of Music      |     3 |         1 |
+| 103 | The Sound of Music      |     2 |         2 |
++-----+-------------------------+-------+-----------+
+
+d) rank
+
+1. dense_rank()
+
+This function will assign rank to each row within a partition without gaps. Basically, the ranks are assigned in a consecutive manner i.e if there is a tie between values then they will be assigned the same rank, and next rank value will be one greater then the previous rank assigned.
+
+select *,dense_rank() over(partition by title order by stars desc) as 'dense_rank'  from movie_ratings;
++-----+-------------------------+-------+------------+
+| mid | title                   | stars | dense_rank |
++-----+-------------------------+-------+------------+
+| 107 | Avatar                  |     5 |          1 |
+| 107 | Avatar                  |     3 |          2 |
+| 104 | E.T.                    |     3 |          1 |
+| 104 | E.T.                    |     2 |          2 |
+| 101 | Gone with the wind      |     4 |          1 |
+| 101 | Gone with the wind      |     3 |          2 |
+| 101 | Gone with the wind      |     2 |          3 |
+| 108 | Raiders of the Lost Ark |     4 |          1 |
+| 108 | Raiders of the Lost Ark |     4 |          1 |
+| 108 | Raiders of the Lost Ark |     2 |          2 |
+| 106 | Snow White              |     5 |          1 |
+| 106 | Snow White              |     4 |          2 |
+| 103 | The Sound of Music      |     3 |          1 |
+| 103 | The Sound of Music      |     2 |          2 |
++-----+-------------------------+-------+------------+
+
+2.rank()
+
+This function will assign rank to each row within a partition with gaps. Here, ranks are assigned in a non-consecutive manner i.e if there is a tie between values then they will be assigned same rank, and next rank value will be previous rank + no of peers(duplicates).
+
+ select *,rank() over(partition by title order by stars desc) as 'rank'  from movie_ratings;
++-----+-------------------------+-------+------+
+| mid | title                   | stars | rank |
++-----+-------------------------+-------+------+
+| 107 | Avatar                  |     5 |    1 |
+| 107 | Avatar                  |     3 |    2 |
+| 104 | E.T.                    |     3 |    1 |
+| 104 | E.T.                    |     2 |    2 |
+| 101 | Gone with the wind      |     4 |    1 |
+| 101 | Gone with the wind      |     3 |    2 |
+| 101 | Gone with the wind      |     2 |    3 |
+| 108 | Raiders of the Lost Ark |     4 |    1 |
+| 108 | Raiders of the Lost Ark |     4 |    1 |
+| 108 | Raiders of the Lost Ark |     2 |    3 |
+| 106 | Snow White              |     5 |    1 |
+| 106 | Snow White              |     4 |    2 |
+| 103 | The Sound of Music      |     3 |    1 |
+| 103 | The Sound of Music      |     2 |    2 |
++-----+-------------------------+-------+------+
+
+3.percent_rank()
+
+It returns the percentile rank of a row within a partition that ranges from 0 to 1. It tells the percentage of partition values less than the value in the current row, excluding the highest value.
+
+It is calculated as (value in rank() - 1) / (no. of rows in partition - 1)
+
+
+select *,percent_rank() over(partition by title order by stars desc) as 'rank'  from movie_ratings;
++-----+-------------------------+-------+------+
+| mid | title                   | stars | rank |
++-----+-------------------------+-------+------+
+| 107 | Avatar                  |     5 |    0 |
+| 107 | Avatar                  |     3 |    1 |
+| 104 | E.T.                    |     3 |    0 |
+| 104 | E.T.                    |     2 |    1 |	
+| 101 | Gone with the wind      |     4 |    0 |
+| 101 | Gone with the wind      |     3 |  0.5 |
+| 101 | Gone with the wind      |     2 |    1 |
+| 108 | Raiders of the Lost Ark |     4 |    0 |
+| 108 | Raiders of the Lost Ark |     4 |    0 |
+| 108 | Raiders of the Lost Ark |     2 |    1 |
+| 106 | Snow White              |     5 |    0 |
+| 106 | Snow White              |     4 |    1 |
+| 103 | The Sound of Music      |     3 |    0 |
+| 103 | The Sound of Music      |     2 |    1 |
++-----+-------------------------+-------+------+
+
+e) group by
+
+The GROUP BY statement groups rows that have the same values into summary rows.
+It is often used with aggregate functions (COUNT(), MAX(), MIN(), SUM(), AVG()) to group the result-set by one or more columns.
+
+select title,avg(stars) from movie_ratings group by mid;
++-------------------------+------------+
+| title                   | avg(stars) |
++-------------------------+------------+
+| Gone with the wind      |     3.0000 |
+| The Sound of Music      |     2.5000 |
+| E.T.                    |     2.5000 |
+| Snow White              |     4.5000 |
+| Avatar                  |     4.0000 |
+| Raiders of the Lost Ark |     3.3333 |
++-------------------------+------------+
+
+
