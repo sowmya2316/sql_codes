@@ -124,7 +124,7 @@ select e.name ,count(e_id),d.dep_name,d.dep_manager from employee e left join  d
 | JOHN HELLEN    |           1 | HEALTH   | TIM ARCHER  |
 +----------------+-------------+----------+-------------+
 
-Here all empolyees in health department should be returned but only one employee name is returning.
+
 
 
 12)Display the Department id,Employee ids and Manager ids for the Communications department
@@ -225,5 +225,3 @@ select name from employee where manager_id in (select e_id from employee where n
 Empty set (0.00 sec)
 
 
-Note:
-In 19th question 2 rows should be returned as 2 departments have 6 employess but oly 1 row is returning.
